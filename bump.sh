@@ -1,6 +1,6 @@
 #!/bin/bash
 # Bumps the semantic version of the git-project.
-# If no semantic version tags exists in the project, the version starts out at v0.0.0
+# If no semantic version tags exist in the project, the version starts out at v0.0.0
 # and is incremented by one for the field indicated by the bump command argument.
 
 find_latest_semver() {
@@ -29,24 +29,34 @@ bump() {
       echo "refusing to tag; $latest_ver already tagged for HEAD ($head_commit)"
   else
       echo "tagging $next_ver $head_commit"
-      git tag "$next_ver" HEAD
+      git tag -a "$next_ver" -m "Release $next_ver" $head_commit
   fi
 }
 
 usage() {
-  echo "Usage: bump [-p prefix] major|minor|patch"
+  echo "Usage: bump [-p prefix] {major|minor|patch} | -l"
   echo "Bumps the semantic version field by one for a git-project."
+  echo
+  echo "Options:"
+  echo "  -l  list the latest tagged version instead of bumping."
+  echo "  -p  prefix [to be] used for the semver tags."
   exit 1
 }
 
-while getopts ":p:" opt; do
+while getopts :p:l opt; do
   case $opt in
     p) PREFIX="$OPTARG";;
-    \?) echo "invalid option -$OPTARG"; exit 1;;
+    l) LIST=1;;
+    \?) usage;;
     :) echo "option -$OPTARG requires an argument"; exit 1;;
   esac
-  shift $((OPTIND-1))
 done
+shift $((OPTIND-1))
+
+if [ ! -z "$LIST" ];then
+  find_latest_semver
+  exit 0
+fi
 
 case $1 in
   major) bump 1 0 0;;
