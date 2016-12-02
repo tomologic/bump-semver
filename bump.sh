@@ -29,7 +29,7 @@ bump() {
       echo "refusing to tag; $latest_ver already tagged for HEAD ($head_commit)"
   else
       echo "tagging $next_ver $head_commit"
-      git tag -a "$next_ver" -m "Release $next_ver" $head_commit
+      git tag "$next_ver" $head_commit
   fi
 }
 
