@@ -23,13 +23,14 @@ increment_ver() {
 bump() {
   next_ver="${PREFIX}$(increment_ver "$1" "$2" "$3")"
   latest_ver="${PREFIX}$(find_latest_semver)"
-  latest_commit=$(git rev-parse "${latest_ver}" 2>/dev/null )
+  latest_commit=$(git rev-list -n 1 "${latest_ver}" 2>/dev/null )
   head_commit=$(git rev-parse HEAD)
-  if [ "$latest_commit" = "$head_commit" ]; then
-      echo "refusing to tag; $latest_ver already tagged for HEAD ($head_commit)"
+  if [ "$latest_commit" == "$head_commit" ]; then
+      echo "refusing to tag; $latest_ver already tagged for HEAD ($head_commit)" >&2
   else
-      echo "tagging $next_ver $head_commit"
-      git tag "$next_ver" $head_commit
+      echo "tagging $next_ver $head_commit" >&2
+      git tag -a "$next_ver" "$head_commit" -m "$next_ver"
+      echo "$next_ver"
   fi
 }
 
@@ -53,7 +54,7 @@ while getopts :p:l opt; do
 done
 shift $((OPTIND-1))
 
-if [ ! -z "$LIST" ];then
+if [ -n "$LIST" ];then
   find_latest_semver
   exit 0
 fi
